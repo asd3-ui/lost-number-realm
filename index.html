@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>مملكة الأرقام المفقودة - The Lost Number Realm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #1a103c;
+            --accent-yellow: #ffd166;
+            --accent-green: #06d6a0;
+            --accent-pink: #ef476f;
+            --accent-blue: #118ab2;
+            --accent-purple: #8338ec;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --font-family: 'Tajawal', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, #0d0628 0%, #2a085c 50%, #4a126b 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(13, 6, 40, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--accent-yellow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-yellow);
+            font-size: 1.3rem;
+            font-weight: 900;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: #fff;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.95rem;
+        }
+
+        .btn-nav {
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-family: var(--font-family);
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #5c1bb8;
+            transition: all 0.1s;
+        }
+
+        .btn-nav:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #5c1bb8;
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .world-map-title {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 25px;
+        }
+
+        .world-map-title h1 {
+            font-size: 2.2rem;
+            color: var(--accent-yellow);
+            margin: 0 0 8px 0;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.6);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 4px solid #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+
+        .game-card .icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .game-card h3 {
+            margin: 5px 0;
+            font-size: 1.4rem;
+            color: #1a103c;
+        }
+
+        .game-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .game-card .btn-play {
+            background: var(--accent-green);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 4px 0 #049f76;
+        }
+
+        .game-container {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 25px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+            text-align: center;
+            position: relative;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #ccc;
+            padding-bottom: 10px;
+        }
+
+        .btn-back {
+            background: #e0e0e0;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-family: var(--font-family);
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .question-box {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 3px solid #e9ecef;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .btn-option {
+            background: #ffffff;
+            border: 3px solid #dee2e6;
+            border-radius: 18px;
+            padding: 18px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: var(--font-family);
+            color: #1a103c;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #ced4da;
+            transition: all 0.1s;
+        }
+
+        .btn-option:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #ced4da;
+        }
+
+        .clock-face {
+            width: 220px;
+            height: 220px;
+            border: 8px solid #118ab2;
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+            position: relative;
+            background: #fff;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        .clock-number {
+            position: absolute;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            background: #333;
+            border-radius: 4px;
+        }
+
+        .hour-hand {
+            width: 6px;
+            height: 55px;
+            background: #ef476f;
+            z-index: 3;
+        }
+
+        .minute-hand {
+            width: 4px;
+            height: 80px;
+            background: #118ab2;
+            z-index: 2;
+        }
+
+        .center-dot {
+            width: 14px;
+            height: 14px;
+            background: #ffd166;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+        }
+
+        .farm-grid {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            min-height: 120px;
+        }
+
+        .animal-item {
+            font-size: 3rem;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .store-item {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            border: 3px solid #eee;
+        }
+
+        .store-item .avatar {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+        }
+
+        .btn-buy {
+            background: var(--accent-yellow);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-family: var(--font-family);
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #e6b800;
+        }
+
+        .feedback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .feedback-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .feedback-card {
+            background: white;
+            padding: 30px;
+            border-radius: 28px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.2s;
+            max-width: 320px;
+            width: 90%;
+        }
+
+        .feedback-overlay.active .feedback-card {
+            transform: scale(1);
+        }
+
+        .feedback-card h2 {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-title">
+            <span>🏰</span> مملكة الأرقام
+        </div>
+        <div class="stats-bar">
+            <div class="stat-badge">⭐ <span id="starsCount">0</span></div>
+            <button class="btn-nav" onclick="showScreen('parentsScreen')">👨‍👩‍👧 للوالدين</button>
+            <button class="btn-nav" onclick="showScreen('storeScreen')">🎒 المتجر</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- خريطة الألعاب -->
+        <div id="mapScreen" class="screen active">
+            <div class="world-map-title">
+                <h1>اختر مغامرتك السحرية 🌟</h1>
+                <p>ساعد أبطال المملكة في استعادة الأرقام والحلول المفقودة!</p>
+            </div>
+            <div class="games-grid">
+                <div class="game-card" onclick="startAlchemyGame()">
+                    <span class="icon">🧪</span>
+                    <h3>مختبر الكيمياء</h3>
+                    <p>إكسير الجمع والطرح السحري</p>
+                    <span class="btn-play">العب الآن</span>
+                </div>
+                <div class="game-card" onclick="startDragonsGame()">
+                    <span class="icon">🐉</span>
+                    <h3>تنانين التوزيع</h3>
+                    <p>قسمة الطعام بالتساوي على التنانين</p>
+                    <span class="btn-play">العب الآن</span>
+                </div>
+                <div class="game-card" onclick="startStarsGame()">
+                    <span class="icon">🌟</span>
+                    <h3>صائد النجوم</h3>
+                    <p>إكمال الأنماط والمتتاليات الرقمية</p>
+                    <span class="btn-play">العب الآن</span>
+                </div>
+                <div class="game-card" onclick="startClockGame()">
+                    <span class="icon">⏰</span>
+                    <h3>بوابات الزمن</h3>
+                    <p>قراءة وتحديد وقت الساعة السحرية</p>
+                    <span class="btn-play">العب الآن</span>
+                </div>
+                <div class="game-card" onclick="startFarmGame()">
+                    <span class="icon">🐥</span>
+                    <h3>مزرعة الحيوانات</h3>
+                    <p>عد الحيوانات وتطابق الأعداد</p>
+                    <span class="btn-play">العب الآن</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- واجهة اللعب العامة -->
+        <div id="gamePlayScreen" class="screen">
+            <div class="game-container">
+                <div class="game-header">
+                    <button class="btn-back" onclick="showScreen('mapScreen')">⬅ الخريطة</button>
+                    <h2 id="gameTitle">عنوان اللعبة</h2>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-purple);" id="gameScore">النقاط: 0</div>
+                </div>
+
+                <div id="gameContent">
+                    <!-- سيتم توليد المحتوى ديناميكياً -->
+                </div>
+            </div>
+        </div>
+
+        <!-- المتجر -->
+        <div id="storeScreen" class="screen">
+            <div class="game-container">
+                <div class="game-header">
+                    <button class="btn-back" onclick="showScreen('mapScreen')">⬅ الخريطة</button>
+                    <h2>متجر المكافآت السحري 🎒</h2>
+                </div>
+                <div class="store-grid">
+                    <div class="store-item">
+                        <div class="avatar">🧙‍♂️</div>
+                        <h3>رداء الساحر الذكي</h3>
+                        <p>50 نجمة</p>
+                        <button class="btn-buy" onclick="buyItem(50)">شراء</button>
+                    </div>
+                    <div class="store-item">
+                        <div class="avatar">👑</div>
+                        <h3>تاج الملك الرقمي</h3>
+                        <p>100 نجمة</p>
+                        <button class="btn-buy" onclick="buyItem(100)">شراء</button>
+                    </div>
+                    <div class="store-item">
+                        <div class="avatar">🦄</div>
+                        <h3>المهر السحري الأليف</h3>
+                        <p>150 نجمة</p>
+                        <button class="btn-buy" onclick="buyItem(150)">شراء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- لوحة الوالدين -->
+        <div id="parentsScreen" class="screen">
+            <div class="game-container">
+                <div class="game-header">
+                    <button class="btn-back" onclick="showScreen('mapScreen')">⬅ الخريطة</button>
+                    <h2>لوحة متابعة أولياء الأمور 👨‍👩‍👧</h2>
+                </div>
+                <div style="text-align: right; line-height: 1.8;">
+                    <h3>📊 تقرير الأداء:</h3>
+                    <p>✔️ عدد الأسئلة المجابة بنجاح: <strong id="totalCorrect">0</strong></p>
+                    <p>⭐ مجموع النجوم المكتسبة: <strong id="parentStars">0</strong></p>
+                    <hr>
+                    <h3>⚙️ إعدادات المستوى:</h3>
+                    <label>درجة الصعوبة:</label>
+                    <select id="difficultySelect" style="padding: 8px; border-radius: 8px; font-family: var(--font-family);">
+                        <option value="easy">سهل (الأرقام 1 - 10)</option>
+                        <option value="medium">متوسط (الأرقام 1 - 20)</option>
+                        <option value="hard">متقدم (الأرقام 1 - 50)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- نافذة النتيجة التفاعلية -->
+    <div id="feedbackOverlay" class="feedback-overlay">
+        <div class="feedback-card">
+            <div id="feedbackIcon" style="font-size: 4rem;">🎉</div>
+            <h2 id="feedbackTitle">ممتاز جداً!</h2>
+            <p id="feedbackText">+10 نجوم سحرية</p>
+            <button class="btn-nav" style="width: 100%; margin-top: 15px; padding: 12px;" onclick="closeFeedback()">استمرار</button>
+        </div>
+    </div>
+
+    <script>
+        let stars = 0;
+        let totalCorrectAnswers = 0;
+        let currentCorrectAnswer = null;
+        let currentGameType = '';
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'ar-SA';
+                msg.rate = 0.9;
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        function playSound(type) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+                gain.gain.fadeOut(ctx.currentTime + 0.4);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+            } else {
+                osc.frequency.setValueAtTime(220, ctx.currentTime);
+                osc.frequency.setValueAtTime(180, ctx.currentTime + 0.1);
+                gain.gain.fadeOut(ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function addStars(count) {
+            stars += count;
+            totalCorrectAnswers++;
+            document.getElementById('starsCount').innerText = stars;
+            document.getElementById('parentStars').innerText = stars;
+            document.getElementById('totalCorrect').innerText = totalCorrectAnswers;
+        }
+
+        function showFeedback(isCorrect, text = '') {
+            const overlay = document.getElementById('feedbackOverlay');
+            const icon = document.getElementById('feedbackIcon');
+            const title = document.getElementById('feedbackTitle');
+            const body = document.getElementById('feedbackText');
+
+            if (isCorrect) {
+                playSound('correct');
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+                icon.innerText = '🌟';
+                title.innerText = 'إجابة رائعة!';
+                body.innerText = text || 'حصلت على 10 نجوم جديدة!';
+                speak('أحسنت! إجابة صحيحة');
+            } else {
+                playSound('wrong');
+                icon.innerText = '💡';
+                title.innerText = 'حاول مرة أخرى!';
+                body.innerText = 'أنت قريب جداً من الحل الصحيح!';
+                speak('حاول مرة أخرى يا بطل');
+            }
+
+            overlay.classList.add('active');
+        }
+
+        function closeFeedback() {
+            document.getElementById('feedbackOverlay').classList.remove('active');
+            if (currentGameType === 'alchemy') startAlchemyGame();
+            else if (currentGameType === 'dragons') startDragonsGame();
+            else if (currentGameType === 'stars') startStarsGame();
+            else if (currentGameType === 'clock') startClockGame();
+            else if (currentGameType === 'farm') startFarmGame();
+        }
+
+        // 1. مختبر الكيمياء
+        function startAlchemyGame() {
+            currentGameType = 'alchemy';
+            showScreen('gamePlayScreen');
+            document.getElementById('gameTitle').innerText = '🧪 مختبر الكيمياء السحرية';
+
+            const num1 = Math.floor(Math.random() * 8) + 1;
+            const num2 = Math.floor(Math.random() * 8) + 1;
+            currentCorrectAnswer = num1 + num2;
+
+            speak(`كم إجمالي العناصر السحرية: ${num1} زائد ${num2}`);
+
+            let options = [currentCorrectAnswer, currentCorrectAnswer + 1, currentCorrectAnswer - 1, currentCorrectAnswer + 2];
+            options = options.filter((v, i, a) => a.indexOf(v) === i && v > 0).sort(() => Math.random() - 0.5);
+
+            document.getElementById('gameContent').innerHTML = `
+                <div class="question-box">
+                    <h2 style="font-size: 2rem; color: var(--accent-purple);">اصنع التعويد السحرية!</h2>
+                    <p style="font-size: 1.5rem;">لديك <span style="color:red; font-weight:bold;">${num1}</span> قطرات حمراء و <span style="color:blue; font-weight:bold;">${num2}</span> قطرات زرقاء.</p>
+                    <h1 style="font-size: 3rem; margin: 15px 0;">${num1} + ${num2} = ؟</h1>
+                </div>
+                <div class="options-grid">
+                    ${options.map(opt => `<button class="btn-option" onclick="checkAnswer(${opt})">${opt}</button>`).join('')}
+                </div>
+            `;
+        }
+
+        // 2. تنانين التوزيع
+        function startDragonsGame() {
+            currentGameType = 'dragons';
+            showScreen('gamePlayScreen');
+            document.getElementById('gameTitle').innerText = '🐉 تنانين التوزيع السعيدة';
+
+            const dragons = 3;
+            const applesPerDragon = Math.floor(Math.random() * 4) + 1;
+            const totalApples = dragons * applesPerDragon;
+            currentCorrectAnswer = applesPerDragon;
+
+            speak(`وزع ${totalApples} تفاحات بالتساوي على 3 تنانين. كم تفاحة لكل تنين؟`);
+
+            let options = [currentCorrectAnswer, currentCorrectAnswer + 1, currentCorrectAnswer + 2, currentCorrectAnswer + 3].sort(() => Math.random() - 0.5);
+
+            document.getElementById('gameContent').innerHTML = `
+                <div class="question-box">
+                    <h2 style="font-size: 1.8rem;">اطعم التنانين 🐉🐉🐉</h2>
+                    <p style="font-size: 1.3rem;">لديك مجموع <strong>${totalApples}</strong> تفاحات نريد توزيعها على <strong>3</strong> تنانين بالتساوي!</p>
+                    <h1 style="font-size: 2.5rem; color: var(--accent-blue);">${totalApples} ÷ 3 = ؟</h1>
+                </div>
+                <div class="options-grid">
+                    ${options.map(opt => `<button class="btn-option" onclick="checkAnswer(${opt})">${opt} تفاحات</button>`).join('')}
+                </div>
+            `;
+        }
+
+        // 3. صائد النجوم
+        function startStarsGame() {
+            currentGameType = 'stars';
+            showScreen('gamePlayScreen');
+            document.getElementById('gameTitle').innerText = '🌟 صائد نجوم المتتاليات';
+
+            const start = Math.floor(Math.random() * 10) + 1;
+            const step = Math.floor(Math.random() * 3) + 1;
+            const seq = [start, start + step, start + (step * 2), start + (step * 3)];
+            currentCorrectAnswer = seq[3];
+
+            speak(`أكمل النمط الرقمي: ${seq[0]}، ${seq[1]}، ${seq[2]}، ثم ماذا؟`);
+
+            let options = [currentCorrectAnswer, currentCorrectAnswer + step, currentCorrectAnswer - 1, currentCorrectAnswer + 2].sort(() => Math.random() - 0.5);
+
+            document.getElementById('gameContent').innerHTML = `
+                <div class="question-box">
+                    <h2>ما هو الرقم التالي في النمط؟</h2>
+                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-purple); margin: 20px 0;">
+                        ${seq[0]} ➔ ${seq[1]} ➔ ${seq[2]} ➔ <span style="color: var(--accent-pink);">؟</span>
+                    </div>
+                </div>
+                <div class="options-grid">
+                    ${options.map(opt => `<button class="btn-option" onclick="checkAnswer(${opt})">⭐ ${opt}</button>`).join('')}
+                </div>
+            `;
+        }
+
+        // 4. بوابات الزمن (ساعة كاملة بالأرقام 1-12)
+        function startClockGame() {
+            currentGameType = 'clock';
+            showScreen('gamePlayScreen');
+            document.getElementById('gameTitle').innerText = '⏰ بوابات الزمن السحرية';
+
+            const hour = Math.floor(Math.random() * 12) + 1;
+            currentCorrectAnswer = hour;
+
+            const hourAngle = (hour % 12) * 30;
+
+            speak(`إلى أي ساعة تشير عقارب الساعة السحرية؟`);
+
+            let options = [hour, (hour % 12) + 1, hour === 1 ? 12 : hour - 1, (hour + 2) % 12 || 12].sort(() => Math.random() - 0.5);
+
+            let numbersHtml = '';
+            for (let i = 1; i <= 12; i++) {
+                const angle = (i * 30 - 90) * (Math.PI / 180);
+                const x = 110 + 85 * Math.cos(angle) - 15;
+                const y = 110 + 85 * Math.sin(angle) - 15;
+                numbersHtml += `<div class="clock-number" style="left: ${x}px; top: ${y}px;">${i}</div>`;
+            }
+
+            document.getElementById('gameContent').innerHTML = `
+                <div class="question-box">
+                    <h2>افتح بوابة الزمن باكتشاف الساعة!</h2>
+                    <div class="clock-face">
+                        ${numbersHtml}
+                        <div class="hand hour-hand" style="transform: rotate(${hourAngle}deg);"></div>
+                        <div class="hand minute-hand" style="transform: rotate(0deg);"></div>
+                        <div class="center-dot"></div>
+                    </div>
+                </div>
+                <div class="options-grid">
+                    ${options.map(opt => `<button class="btn-option" onclick="checkAnswer(${opt})">الساعة ${opt}:00</button>`).join('')}
+                </div>
+            `;
+        }
+
+        // 5. مزرعة الحيوانات
+        function startFarmGame() {
+            currentGameType = 'farm';
+            showScreen('gamePlayScreen');
+            document.getElementById('gameTitle').innerText = '🐥 مزرعة الحيوانات السحرية';
+
+            const animals = ['🐥', '🐰', '🐑', '🐮'];
+            const chosenAnimal = animals[Math.floor(Math.random() * animals.length)];
+            const count = Math.floor(Math.random() * 6) + 2;
+            currentCorrectAnswer = count;
+
+            speak(`كم عدد الحيوانات الموجودة في المزرعة؟`);
+
+            let animalIconsHtml = '';
+            for (let i = 0; i < count; i++) {
+                animalIconsHtml += `<span class="animal-item">${chosenAnimal}</span>`;
+            }
+
+            let options = [count, count + 1, count - 1, count + 2].filter(v => v > 0).sort(() => Math.random() - 0.5);
+
+            document.getElementById('gameContent').innerHTML = `
+                <div class="question-box">
+                    <h2>قم بتركيز وعد الكائنات السحرية!</h2>
+                    <div class="farm-grid">
+                        ${animalIconsHtml}
+                    </div>
+                </div>
+                <div class="options-grid">
+                    ${options.map(opt => `<button class="btn-option" onclick="checkAnswer(${opt})">${opt}</button>`).join('')}
+                </div>
+            `;
+        }
+
+        function checkAnswer(selectedOption) {
+            if (selectedOption === currentCorrectAnswer) {
+                addStars(10);
+                showFeedback(true);
+            } else {
+                showFeedback(false);
+            }
+        }
+
+        function buyItem(cost) {
+            if (stars >= cost) {
+                stars -= cost;
+                document.getElementById('starsCount').innerText = stars;
+                document.getElementById('parentStars').innerText = stars;
+                alert('🎉 مبروك! تم التجهيز بالشراء بنجاح.');
+            } else {
+                alert('💡 تحتاج إلى المزيد من النجوم! العب وحل الألغاز لتحصل عليها.');
+            }
+        }
+    </script>
+</body>
+</html>

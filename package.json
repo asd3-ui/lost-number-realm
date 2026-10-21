@@ -1,0 +1,17 @@
+{
+  "name": "lost-number-realm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "لعبة مملكة الأرقام المفقودة التعليمية",
+  "scripts": {
+    "build": "mkdir -p www && cp index.html www/index.html",
+    "android:sync": "npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/core": "^6.2.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.1"
+  }
+}

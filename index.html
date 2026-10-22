@@ -533,15 +533,6 @@
         let totalCorrectAnswers = 0;
         let currentCorrectAnswer = null;
         let currentGameType = '';
-        let lastAnswerCorrect = false;
-        let currentScore = 0;
-        let audioContext = null;
-
-        function getDifficultyMax() {
-            const select = document.getElementById('difficultySelect');
-            const levels = { easy: 10, medium: 20, hard: 50 };
-            return levels[select ? select.value : 'easy'] || 10;
-        }
 
         function speak(text) {
             if ('speechSynthesis' in window) {
@@ -554,12 +545,7 @@
         }
 
         function playSound(type) {
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContextClass) return;
-            try {
-            if (!audioContext) audioContext = new AudioContextClass();
-            const ctx = audioContext;
-            if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -569,44 +555,32 @@
                 osc.frequency.setValueAtTime(523.25, ctx.currentTime);
                 osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
                 osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
-                gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                gain.gain.fadeOut(ctx.currentTime + 0.4);
                 osc.start();
                 osc.stop(ctx.currentTime + 0.4);
             } else {
                 osc.frequency.setValueAtTime(220, ctx.currentTime);
                 osc.frequency.setValueAtTime(180, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                gain.gain.fadeOut(ctx.currentTime + 0.3);
                 osc.start();
                 osc.stop(ctx.currentTime + 0.3);
-            }
-            } catch (error) {
-                console.warn('Audio playback unavailable:', error);
             }
         }
 
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
-            if (screenId === 'mapScreen') {
-                currentScore = 0;
-                document.getElementById('gameScore').innerText = 'النقاط: 0';
-            }
         }
 
         function addStars(count) {
             stars += count;
             totalCorrectAnswers++;
-            currentScore += count;
             document.getElementById('starsCount').innerText = stars;
             document.getElementById('parentStars').innerText = stars;
             document.getElementById('totalCorrect').innerText = totalCorrectAnswers;
-            document.getElementById('gameScore').innerText = `النقاط: ${currentScore}`;
         }
 
         function showFeedback(isCorrect, text = '') {
-            lastAnswerCorrect = isCorrect;
             const overlay = document.getElementById('feedbackOverlay');
             const icon = document.getElementById('feedbackIcon');
             const title = document.getElementById('feedbackTitle');
@@ -614,7 +588,7 @@
 
             if (isCorrect) {
                 playSound('correct');
-                if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
                 icon.innerText = '🌟';
                 title.innerText = 'إجابة رائعة!';
                 body.innerText = text || 'حصلت على 10 نجوم جديدة!';
@@ -632,7 +606,6 @@
 
         function closeFeedback() {
             document.getElementById('feedbackOverlay').classList.remove('active');
-            if (!lastAnswerCorrect) return;
             if (currentGameType === 'alchemy') startAlchemyGame();
             else if (currentGameType === 'dragons') startDragonsGame();
             else if (currentGameType === 'stars') startStarsGame();
@@ -646,9 +619,8 @@
             showScreen('gamePlayScreen');
             document.getElementById('gameTitle').innerText = '🧪 مختبر الكيمياء السحرية';
 
-            const maxNumber = getDifficultyMax();
-            const num1 = Math.floor(Math.random() * maxNumber) + 1;
-            const num2 = Math.floor(Math.random() * maxNumber) + 1;
+            const num1 = Math.floor(Math.random() * 8) + 1;
+            const num2 = Math.floor(Math.random() * 8) + 1;
             currentCorrectAnswer = num1 + num2;
 
             speak(`كم إجمالي العناصر السحرية: ${num1} زائد ${num2}`);
@@ -675,7 +647,7 @@
             document.getElementById('gameTitle').innerText = '🐉 تنانين التوزيع السعيدة';
 
             const dragons = 3;
-            const applesPerDragon = Math.floor(Math.random() * Math.min(10, getDifficultyMax())) + 1;
+            const applesPerDragon = Math.floor(Math.random() * 4) + 1;
             const totalApples = dragons * applesPerDragon;
             currentCorrectAnswer = applesPerDragon;
 
@@ -701,7 +673,7 @@
             showScreen('gamePlayScreen');
             document.getElementById('gameTitle').innerText = '🌟 صائد نجوم المتتاليات';
 
-            const start = Math.floor(Math.random() * getDifficultyMax()) + 1;
+            const start = Math.floor(Math.random() * 10) + 1;
             const step = Math.floor(Math.random() * 3) + 1;
             const seq = [start, start + step, start + (step * 2), start + (step * 3)];
             currentCorrectAnswer = seq[3];
@@ -770,7 +742,7 @@
 
             const animals = ['🐥', '🐰', '🐑', '🐮'];
             const chosenAnimal = animals[Math.floor(Math.random() * animals.length)];
-            const count = Math.floor(Math.random() * Math.min(15, getDifficultyMax())) + 1;
+            const count = Math.floor(Math.random() * 6) + 2;
             currentCorrectAnswer = count;
 
             speak(`كم عدد الحيوانات الموجودة في المزرعة؟`);
@@ -796,7 +768,6 @@
         }
 
         function checkAnswer(selectedOption) {
-            if (document.getElementById('feedbackOverlay').classList.contains('active')) return;
             if (selectedOption === currentCorrectAnswer) {
                 addStars(10);
                 showFeedback(true);

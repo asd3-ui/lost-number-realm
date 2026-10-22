@@ -589,6 +589,10 @@
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
+            if (screenId === 'mapScreen') {
+                currentScore = 0;
+                document.getElementById('gameScore').innerText = 'النقاط: 0';
+            }
         }
 
         function addStars(count) {
@@ -641,8 +645,6 @@
             currentGameType = 'alchemy';
             showScreen('gamePlayScreen');
             document.getElementById('gameTitle').innerText = '🧪 مختبر الكيمياء السحرية';
-            currentScore = 0;
-            document.getElementById('gameScore').innerText = 'النقاط: 0';
 
             const maxNumber = getDifficultyMax();
             const num1 = Math.floor(Math.random() * maxNumber) + 1;
@@ -671,8 +673,6 @@
             currentGameType = 'dragons';
             showScreen('gamePlayScreen');
             document.getElementById('gameTitle').innerText = '🐉 تنانين التوزيع السعيدة';
-            currentScore = 0;
-            document.getElementById('gameScore').innerText = 'النقاط: 0';
 
             const dragons = 3;
             const applesPerDragon = Math.floor(Math.random() * Math.min(10, getDifficultyMax())) + 1;
@@ -700,8 +700,6 @@
             currentGameType = 'stars';
             showScreen('gamePlayScreen');
             document.getElementById('gameTitle').innerText = '🌟 صائد نجوم المتتاليات';
-            currentScore = 0;
-            document.getElementById('gameScore').innerText = 'النقاط: 0';
 
             const start = Math.floor(Math.random() * getDifficultyMax()) + 1;
             const step = Math.floor(Math.random() * 3) + 1;
@@ -730,8 +728,6 @@
             currentGameType = 'clock';
             showScreen('gamePlayScreen');
             document.getElementById('gameTitle').innerText = '⏰ بوابات الزمن السحرية';
-            currentScore = 0;
-            document.getElementById('gameScore').innerText = 'النقاط: 0';
 
             const hour = Math.floor(Math.random() * 12) + 1;
             currentCorrectAnswer = hour;
@@ -771,8 +767,6 @@
             currentGameType = 'farm';
             showScreen('gamePlayScreen');
             document.getElementById('gameTitle').innerText = '🐥 مزرعة الحيوانات السحرية';
-            currentScore = 0;
-            document.getElementById('gameScore').innerText = 'النقاط: 0';
 
             const animals = ['🐥', '🐰', '🐑', '🐮'];
             const chosenAnimal = animals[Math.floor(Math.random() * animals.length)];

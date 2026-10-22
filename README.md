@@ -1,22 +1,37 @@
 # 🏰 مملكة الأرقام المفقودة — The Lost Number Realm
 
-لعبة تعليمية تفاعلية باللغة العربية للأطفال، مبنية كصفحة HTML وتُغلّف كتطبيق Android باستخدام Apache Cordova.
+لعبة تعليمية تفاعلية باللغة العربية للأطفال، مبنية بواجهة HTML/CSS/JavaScript وتُغلّف كتطبيق Android باستخدام Capacitor.
 
 ## بناء APK تلقائيًا
 
-يعمل GitHub Actions عند الدفع إلى الفرع `main` أو `master`، ويمكن تشغيله يدويًا:
+يبدأ GitHub Actions تلقائيًا عند الدفع إلى الفرع `main` أو `master`، ويمكن تشغيله يدويًا:
 
-1. افتح تبويب **Actions** في المستودع.
+1. افتح تبويب [Actions](../../actions/workflows/build_apk.yml).
 2. اختر **Build Android APK**.
 3. اضغط **Run workflow** عند الحاجة.
-4. بعد نجاح البناء، افتح تشغيل workflow وانزل إلى **Artifacts**.
-5. نزّل `LostNumberRealm-APK` واستخرج ملف APK.
+4. افتح آخر تشغيل وانتظر حتى تصبح حالته **Success**.
+5. من قسم **Artifacts** نزّل `LostNumberRealm-APK`، ثم استخرج الملف `app-debug.apk`.
 
-> ملف APK الناتج غير موقّع للنشر على Google Play؛ يمكن استخدامه للاختبار، أما النشر العام فيتطلب إعداد توقيع Android.
+ينتج البناء ملف **Debug APK قابلًا للتثبيت للاختبار**. هذا الملف ليس إصدارًا موقّعًا للنشر على Google Play؛ النشر العام يتطلب إعداد توقيع إصدار Release.
 
-## ملفات المشروع
+## الملفات الأساسية
 
-- `index.html`: واجهة اللعبة ومنطقها.
-- `.github/workflows/build_apk.yml`: بناء Android ورفع APK كـ Artifact.
+- `index.html`: واجهة اللعبة ومنطق الألعاب.
+- `package.json`: تبعيات Capacitor وأمر تجهيز ملفات الويب.
+- `capacitor.config.json`: معرّف التطبيق وإعداداته.
+- `.github/workflows/build_apk.yml`: بناء APK ورفعه كـ Artifact.
 
-يتطلب الـ workflow وجود `index.html` في جذر المستودع، ويستخدم Java 17 وAndroid SDK وCordova.
+## البناء محليًا
+
+يتطلب Node.js 20 وJava 17 وAndroid SDK:
+
+```bash
+npm install
+npm run build
+npx cap add android
+npx cap sync android
+cd android
+./gradlew assembleDebug
+```
+
+يوجد التطبيق الناتج في `android/app/build/outputs/apk/debug/app-debug.apk`.
